@@ -1,0 +1,27 @@
+{
+  "name": "betechified-grp3-contact-book-api",
+  "version": "1.0.0",
+  "description": "Contact Book REST API built with Express and SQLite (BeTechified, Group 3)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nouxel00/BeTechified-GRP3-Contact-Book-API.git"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nouxel00/BeTechified-GRP3-Contact-Book-API/issues"
+  },
+  "homepage": "https://github.com/nouxel00/BeTechified-GRP3-Contact-Book-API#readme",
+  "dependencies": {
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0"
+  },
+  "engines": {
+    "node": ">=22.13"
+  }
+}
