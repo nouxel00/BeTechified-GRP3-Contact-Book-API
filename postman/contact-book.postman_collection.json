@@ -1,0 +1,422 @@
+{
+  "info": {
+    "name": "Contact Book API - Group 3",
+    "description": "Run the requests from top to bottom, or use the Collection Runner. The contact created in request 1 is deleted in request 9, so the collection can be run again at any time.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:3000"
+    },
+    {
+      "key": "contactId",
+      "value": ""
+    },
+    {
+      "key": "phone",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Create a contact",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// A new phone number for each run, so the collection can be run again.",
+              "pm.collectionVariables.set(\"phone\", \"+226\" + Date.now().toString().slice(-8));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "const contact = pm.response.json();",
+              "pm.collectionVariables.set(\"contactId\", contact.id);",
+              "pm.test(\"Contact has an id\", () => pm.expect(contact.id).to.be.a(\"number\"));",
+              "pm.test(\"Phone is saved\", () => pm.expect(contact.phone).to.eql(pm.collectionVariables.get(\"phone\")));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/contacts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "contacts"
+          ]
+        },
+        "description": "Creates a contact and saves its id in the contactId variable.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Awa\",\n  \"lastName\": \"Traore\",\n  \"phone\": \"{{phone}}\",\n  \"email\": \"awa.traore@example.com\",\n  \"address\": \"Ouagadougou\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Duplicate phone",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Error code is PHONE_ALREADY_EXISTS\", () => pm.expect(pm.response.json().error.code).to.eql(\"PHONE_ALREADY_EXISTS\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/contacts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "contacts"
+          ]
+        },
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Awa\",\n  \"lastName\": \"Traore\",\n  \"phone\": \"{{phone}}\",\n  \"email\": \"awa.traore@example.com\",\n  \"address\": \"Ouagadougou\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Missing phone",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Error code is VALIDATION_ERROR\", () => pm.expect(pm.response.json().error.code).to.eql(\"VALIDATION_ERROR\"));",
+              "pm.test(\"Error names the phone field\", () => pm.expect(pm.response.json().error.details[0].field).to.eql(\"phone\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/contacts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "contacts"
+          ]
+        },
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Awa\",\n  \"lastName\": \"Traore\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Malformed JSON",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Error code is INVALID_JSON\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_JSON\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/contacts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "contacts"
+          ]
+        },
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"firstName\": \"Awa\", ",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. List contacts",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Response is a list\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));",
+              "pm.test(\"List contains the new contact\", () => pm.expect(pm.response.json().map(c => c.id)).to.include(Number(pm.collectionVariables.get(\"contactId\"))));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/contacts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "contacts"
+          ]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "6. Get one contact",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"First name is Awa\", () => pm.expect(pm.response.json().firstName).to.eql(\"Awa\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/contacts/{{contactId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "contacts",
+            "{{contactId}}"
+          ]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "7. Invalid id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Error code is INVALID_ID\", () => pm.expect(pm.response.json().error.code).to.eql(\"INVALID_ID\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/contacts/abc",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "contacts",
+            "abc"
+          ]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "8. Update the contact",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"First name is updated\", () => pm.expect(pm.response.json().firstName).to.eql(\"Aminata\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/contacts/{{contactId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "contacts",
+            "{{contactId}}"
+          ]
+        },
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Aminata\",\n  \"lastName\": \"Traore\",\n  \"phone\": \"{{phone}}\",\n  \"email\": \"awa.traore@example.com\",\n  \"address\": \"Ouagadougou\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "9. Delete the contact",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/contacts/{{contactId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "contacts",
+            "{{contactId}}"
+          ]
+        },
+        "description": ""
+      },
+      "response": []
+    },
+    {
+      "name": "10. Get the deleted contact",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));",
+              "pm.test(\"Error code is CONTACT_NOT_FOUND\", () => pm.expect(pm.response.json().error.code).to.eql(\"CONTACT_NOT_FOUND\"));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/contacts/{{contactId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "contacts",
+            "{{contactId}}"
+          ]
+        },
+        "description": ""
+      },
+      "response": []
+    }
+  ]
+}
